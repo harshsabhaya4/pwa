@@ -10,8 +10,7 @@ clientsClaim();
 
 // precacheAndRoute(self.__WB_MANIFEST);
 precacheAndRoute(self.__WB_MANIFEST.concat([
-  { url: '/', revision: null },
-  { url: '/offline.html', revision: null }
+  { url: '/', revision: null }
 ]));
 registerRoute(
   ({ request }) => request.mode === 'navigate',
