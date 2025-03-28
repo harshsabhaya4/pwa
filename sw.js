@@ -7,16 +7,10 @@ import { clientsClaim } from "workbox-core";
 
 self.skipWaiting();
 clientsClaim();
-
-// 👇 Precaches all HTML, JS, CSS from build
-precacheAndRoute(self.__WB_MANIFEST);
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() =>
-      caches.match(event.request).then((res) => res || caches.match('/'))
-    )
-  );
-});
+precacheAndRoute([
+  { url: '/', revision: null },
+  ...self.__WB_MANIFEST,
+]);
 registerRoute(
   ({ request }) => request.mode === 'navigate',
   new NetworkFirst({
@@ -24,6 +18,14 @@ registerRoute(
     plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
   })
 );
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() =>
+      caches.match(event.request).then((res) => res || caches.match('/'))
+    )
+  );
+});
 
 
 // 👇 Force offline support for root `/`
@@ -46,15 +48,7 @@ registerRoute(
     plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
   })
 );
-setCatchHandler(async ({ event }) => {
-  // If it's a document (HTML), return the root (/) or fallback page
-  if (event.request.destination === 'document') {
-    return caches.match('/');
-  }
 
-  // For others, just fail silently
-  return Response.error();
-});
 // 👇 External images & videos
 registerRoute(
   ({ url }) =>
@@ -68,3 +62,11 @@ registerRoute(
     ],
   })
 );
+
+
+setCatchHandler(async ({ event }) => {
+  if (event.request.destination === 'document') {
+    return caches.match('/');
+  }
+  return Response.error();
+});
