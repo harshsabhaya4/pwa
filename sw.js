@@ -10,8 +10,19 @@ clientsClaim();
 
 // precacheAndRoute(self.__WB_MANIFEST);
 precacheAndRoute(self.__WB_MANIFEST.concat([
-  { url: '/', revision: null }
+  { url: '/', revision: null },
+  { url: '/offline.html', revision: null }
 ]));
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  async () => {
+    try {
+      return await fetch('/');
+    } catch (error) {
+      return await matchPrecache('/offline.html');
+    }
+  }
+)
 
 const handler = createHandlerBoundToURL('/');
 
