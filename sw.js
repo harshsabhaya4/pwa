@@ -1,5 +1,5 @@
 import { precacheAndRoute } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
+import { registerRoute, setCatchHandler } from "workbox-routing";
 import { CacheFirst, StaleWhileRevalidate, NetworkFirst } from "workbox-strategies";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { ExpirationPlugin } from "workbox-expiration";
@@ -17,6 +17,13 @@ self.addEventListener('fetch', (event) => {
     )
   );
 });
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  new NetworkFirst({
+    cacheName: 'pages-cache',
+    plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
+  })
+);
 
 
 // 👇 Force offline support for root `/`
@@ -39,7 +46,15 @@ registerRoute(
     plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
   })
 );
+setCatchHandler(async ({ event }) => {
+  // If it's a document (HTML), return the root (/) or fallback page
+  if (event.request.destination === 'document') {
+    return caches.match('/');
+  }
 
+  // For others, just fail silently
+  return Response.error();
+});
 // 👇 External images & videos
 registerRoute(
   ({ url }) =>
