@@ -8,7 +8,11 @@ import { clientsClaim } from "workbox-core";
 self.skipWaiting();
 clientsClaim();
 
-precacheAndRoute(self.__WB_MANIFEST);
+// precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST.concat([
+  { url: '/', revision: null }
+]));
+
 const handler = createHandlerBoundToURL('/');
 
 const navigationRoute = new NavigationRoute(handler, {
