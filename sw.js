@@ -1,5 +1,5 @@
-import { createHandlerBoundToURL, precacheAndRoute } from "workbox-precaching";
-import { NavigationRoute, registerRoute } from "workbox-routing";
+import { createHandlerBoundToURL, precacheAndRoute, matchPrecache } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
 import { CacheFirst, StaleWhileRevalidate, NetworkFirst } from "workbox-strategies";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { ExpirationPlugin } from "workbox-expiration";
@@ -8,10 +8,11 @@ import { clientsClaim } from "workbox-core";
 self.skipWaiting();
 clientsClaim();
 
-// precacheAndRoute(self.__WB_MANIFEST);
 precacheAndRoute(self.__WB_MANIFEST.concat([
   { url: '/', revision: null }
 ]));
+
+// Notify app when caching is done
 self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
@@ -23,6 +24,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
+// Handle navigation + fallback to offline page
 registerRoute(
   ({ request }) => request.mode === 'navigate',
   async () => {
@@ -32,22 +34,18 @@ registerRoute(
       return await matchPrecache('/offline.html');
     }
   }
-)
+);
 
-
-
-// 👇 Force offline support for root `/`
+// Cache root `/` for iOS home screen
 registerRoute(
   ({ url }) => url.pathname === '/',
   new NetworkFirst({
     cacheName: 'start-url',
-    plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
-    ],
+    plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
   })
 );
 
-// 👇 App shell: JS, CSS
+// Cache JS & CSS
 registerRoute(
   ({ request }) =>
     request.destination === 'script' || request.destination === 'style',
@@ -57,7 +55,7 @@ registerRoute(
   })
 );
 
-// 👇 External images & videos
+// Cache external media
 registerRoute(
   ({ url }) =>
     url.origin === "https://assets.oregontool.com" &&
