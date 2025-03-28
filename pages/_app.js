@@ -1,6 +1,7 @@
 // pages/_app.js
 import Head from 'next/head';
 import '../styles/globals.css';
+import { useEffect, useState } from 'react';
 
 function MyApp({ Component, pageProps }) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
