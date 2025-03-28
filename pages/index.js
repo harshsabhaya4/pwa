@@ -189,7 +189,7 @@ export default function Home() {
     </button>
     <div className="media-view">
     {activeContent.text && (
-        <p style={{ marginTop: "16px", fontSize: "16px", lineHeight: "1.6", maxWidth:"48%" }}>
+        <p>
           {activeContent.text}
         </p>
       )}

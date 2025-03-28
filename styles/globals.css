@@ -76,3 +76,20 @@ button.back-btn {
     align-items: flex-start;
     gap: 30px;
 }
+.media-view p {
+  margin-top: 16px;
+  font-size: 16px;
+  max-width: 48%;
+}
+@media screen and (max-width: 576px) {
+.media-view  {
+    flex-direction: column
+  }
+  .media-view p {
+    max-width: 100%;
+  }
+  img,video {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
