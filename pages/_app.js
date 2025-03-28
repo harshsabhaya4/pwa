@@ -12,15 +12,6 @@ function MyApp({ Component, pageProps }) {
   // Detect online/offline status
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
-        setSwReady(true);
-      });
-  
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'CACHE_FINISHED') {
-          console.log('✅ Cache finished');
-        }
-      });
   
       const handleOnline = () => setIsOffline(false);
       const handleOffline = () => setIsOffline(true);
@@ -34,6 +25,14 @@ function MyApp({ Component, pageProps }) {
       };
     }
   }, []);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(() => {
+        setSwReady(true);
+      });
+    }
+  }, []);
+  
 
 
   return (
