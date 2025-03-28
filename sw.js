@@ -10,6 +10,14 @@ clientsClaim();
 
 // 👇 Precaches all HTML, JS, CSS from build
 precacheAndRoute(self.__WB_MANIFEST);
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() =>
+      caches.match(event.request).then((res) => res || caches.match('/'))
+    )
+  );
+});
+
 
 // 👇 Force offline support for root `/`
 registerRoute(

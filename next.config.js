@@ -3,6 +3,8 @@ const withPWA = require("next-pwa")({
     dest: "public",
     register: true,
     skipWaiting: true,
+    swSrc: "sw.js", // 👈 now a source file, no longer inside /public
+    buildExcludes: [/middleware-manifest\.json$/, /dynamic-css-manifest\.json$/],
     additionalManifestEntries: [
       {
         url: "https://assets.oregontool.com/adaptivemedia/rendition?id=9fe548dc441e9fb005e6c3cba497aa4daa0a324b",
@@ -41,7 +43,6 @@ const withPWA = require("next-pwa")({
   
   module.exports = withPWA({
     reactStrictMode: true,
-    output: 'export',
     
   });
   
