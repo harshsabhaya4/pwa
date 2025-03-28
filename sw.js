@@ -1,5 +1,5 @@
-import { precacheAndRoute } from "workbox-precaching";
-import { registerRoute, setCatchHandler } from "workbox-routing";
+import { createHandlerBoundToURL, precacheAndRoute } from "workbox-precaching";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 import { CacheFirst, StaleWhileRevalidate, NetworkFirst } from "workbox-strategies";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { ExpirationPlugin } from "workbox-expiration";
@@ -7,25 +7,14 @@ import { clientsClaim } from "workbox-core";
 
 self.skipWaiting();
 clientsClaim();
-precacheAndRoute([
-  { url: '/', revision: null },
-  ...self.__WB_MANIFEST,
-]);
-registerRoute(
-  ({ request }) => request.mode === 'navigate',
-  new NetworkFirst({
-    cacheName: 'pages-cache',
-    plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
-  })
-);
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() =>
-      caches.match(event.request).then((res) => res || caches.match('/'))
-    )
-  );
+precacheAndRoute(self.__WB_MANIFEST);
+const handler = createHandlerBoundToURL('/');
+
+const navigationRoute = new NavigationRoute(handler, {
+  denylist: [/^\/_/, /\/[^\/]+\.[^\/]+$/], // exclude Next.js internals & file paths
 });
+registerRoute(navigationRoute);
 
 
 // 👇 Force offline support for root `/`
@@ -62,11 +51,3 @@ registerRoute(
     ],
   })
 );
-
-
-setCatchHandler(async ({ event }) => {
-  if (event.request.destination === 'document') {
-    return caches.match('/');
-  }
-  return Response.error();
-});
